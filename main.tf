@@ -11,7 +11,7 @@ terraform {
 
 locals {
   # GENERAL
-  region = "eu-west-1"
+  region = "eu-central-1"
   name   = terraform.workspace
   tags = {
     Name  = local.name
@@ -40,11 +40,11 @@ locals {
     prod = {
       core = {
         name         = "core-prod"
-        min_size     = 2
-        max_size     = 6
-        desired_size = 4
+        min_size     = 1
+        max_size     = 4
+        desired_size = 2
 
-        use_custom_launch_template = false
+        use_custom_launch_template = true
 
         enable_monitoring = true
 
@@ -52,7 +52,6 @@ locals {
           AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
           AmazonSSMManagedInstanceCore       = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
           CloudWatchAgentServerPolicy        = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-          AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
         }
 
         instance_types = ["t3.medium"]
@@ -65,7 +64,7 @@ locals {
               volume_size           = 20
               volume_type           = "gp3"
               iops                  = 3000
-              throughput            = 100
+              throughput            = 150
               delete_on_termination = true
             }
           }
@@ -139,7 +138,6 @@ module "cluster" {
 
     use_custom_launch_template = false
 
-    # Enables detailed monitoring for auto scaling group EC2 instances used as cluster worker nodes.
     enable_monitoring = true
   }
 
@@ -193,29 +191,3 @@ module "vpc" {
 
   tags = merge(local.tags, { "Name" : local.name })
 }
-
-module "ebs_kms_key" {
-  source   = "terraform-aws-modules/kms/aws"
-  version  = "~> 2.1"
-
-  description = "Customer managed key to encrypt EKS managed node group volumes"
-
-  # Policy
-  key_administrators = [
-    data.aws_caller_identity.current.arn
-  ]
-
-  key_service_roles_for_autoscaling = [
-    # required for the ASG to manage encrypted volumes for nodes
-    "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling",
-    # required for the cluster / persistentvolume-controller to create encrypted PVCs
-    module.cluster.cluster_iam_role_arn,
-  ]
-
-  # Aliases
-  aliases = ["eks/${local.name}/ebs"]
-
-  tags = merge(local.tags, { "Name" : local.name })
-}
-
-
