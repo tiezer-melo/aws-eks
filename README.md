@@ -29,7 +29,16 @@ provider "aws" {
 }
 ```
 
-After creating the module invocation file, the commands below can be followed to perform the resource creation at AWS.:
+The module assumes the use of the Terraform workspace feature to allow the use of the same code for different environments, as well as the possibility of making the code more dynamic if used in conjunction with tfvars. For the proposed example, the accepted values ​​for the workspace name are dev and prod. These values ​​will be used both to select one of the two predefined node groups and to assign the name of the cluster and VPC.
+
+The workspace can be created and defined using the following commands, in which the workspace called prod will be used in the example:
+
+```bash
+$ terraform workspace new prod
+$ terraform workspace select prod
+```
+
+After creating the module invocation file and configuring the terraform workspace, the commands below can be followed to deploy the resources on AWS:
 
 ```bash
 $ terraform init
