@@ -46,7 +46,16 @@ locals {
 
         use_custom_launch_template = false
 
-        instance_types = ["t3.2xlarge"]
+        enable_monitoring = true
+
+        iam_role_additional_policies = {
+          AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+          AmazonSSMManagedInstanceCore       = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+          CloudWatchAgentServerPolicy        = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+          AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+        }
+
+        instance_types = ["t3.medium"]
         capacity_type  = "ON_DEMAND"
 
         block_device_mappings = {
