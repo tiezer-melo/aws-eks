@@ -66,7 +66,7 @@ module "cluster" {
       max_size     = 3
       desired_size = 2
 
-      use_custom_launch_template = false
+      use_custom_launch_template = true
       ami_type       = "AL2_x86_64"
       instance_types = ["t3.medium"]
       capacity_type  = "ON_DEMAND"
